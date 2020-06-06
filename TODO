@@ -1,0 +1,11 @@
+Features:
+    ☐ Delete nodes
+    ☐ Update nodes (?)
+    ☐ Tests
+
+Bugfixes:
+    ☐ Segfault on MapIterator
+
+Extra:
+    ☐ Cleaner project structure
+    ☐ Simple UI
