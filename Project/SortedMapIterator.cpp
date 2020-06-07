@@ -32,7 +32,7 @@ bool SortedMapIterator<K, V>::valid() const
 }
 
 template<typename K, typename V>
-KeyValuePair SortedMapIterator<K, V>::getCurrent() const
+SortedMapIterator<K, V>::KeyValuePair SortedMapIterator<K, V>::getCurrent() const
 {
     return KeyValuePair(this->current->key, this->current->value); return KeyValuePair();
 }

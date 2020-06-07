@@ -18,7 +18,7 @@ class SortedMapIterator
         Node* current;
 
     public:
-        SortedMapIterator(const SortedMap<K, V>& m) : map(m);
+        SortedMapIterator(const SortedMap<K, V>& m);
         bool valid() const;
         KeyValuePair getCurrent() const;
         void next();
