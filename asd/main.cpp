@@ -317,11 +317,6 @@ struct Invoice {
             cost == other.cost
         );
     }
-
-    // bool operator==(const Invoice other, const Invoice s2)
-    // {
-    //     return id == other.id && name == other.name && cost == other.cost;
-    // }
 };
 
 std::string getHeader(size_t suffix);
