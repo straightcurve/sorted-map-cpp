@@ -1,37 +1,113 @@
 #include <string>
 #include <iostream>
-#include <iterator>
-#include <vector>
+
+template <typename K, typename V>
+class MapIterator;
 
 template <typename K, typename V>
 class Map {
+    friend class MapIterator<K, V>;
+
+    class Node {
+        public:
+            Node* left;
+            Node* right;
+            Node* parent;
+            K key;
+            V value;
+
+            Node() {
+                left = nullptr;
+                right = nullptr;
+                parent = nullptr;
+            }
+
+            Node(K _key, V _value) {
+                left = nullptr;
+                right = nullptr;
+                parent = nullptr;
+                key = _key;
+                value = _value;
+            }
+    };
+
+    Node* root;
     int count;
 
+    void clear() {
+        cleanUp(root);
+    }
+    
+    void cleanUp(Node* &node) {
+        if(node == nullptr) 
+            return;
+
+        cleanUp(node->left);
+        cleanUp(node->right);
+        delete node;
+        node = nullptr;
+    }
+
+    Node* lookup(K key, Node* &node) {
+        if(node == nullptr)
+            return nullptr;
+
+        if(key < node->key)
+            return lookup(key, node->left);
+        else if(key > node->key) 
+            return lookup(key, node->right);
+
+        return node;
+    }
+
+    void removeRoot() {
+        //  1. leaf
+        if(root->left == nullptr && root->right == nullptr) {
+            root = nullptr;
+        }
+
+        //  2. 2 children
+        else if(root->left != nullptr && root->right != nullptr) {
+            auto leftmost = root->right;
+            while(leftmost->left != nullptr)
+                leftmost = leftmost->left;
+
+            remove(leftmost->key);
+
+            leftmost->left = root->left;
+            leftmost->right = root->right;
+
+            root = leftmost;
+        }
+
+        //  3. 1 child
+        else {
+            if(root->left != nullptr)
+                root = root->left;
+            else
+                root = root->right;
+        }
+    }
+
+    Node* insert(K &key, V &value, Node* &node) {
+        if(node == nullptr)
+            return new Node(key, value);
+
+        if(key < node->key) {
+            Node* left = insert(key, value, node->left);
+            node->left = left;
+            left->parent = node;
+        }
+        else if(key > node->key) {
+            Node* right = insert(key, value, node->right);
+            node->right = right;
+            right->parent = node;
+        }
+
+        return node;
+    }
+
     public:
-        class Node {
-            public:
-                Node* left;
-                Node* right;
-                Node* parent;
-                K key;
-                V value;
-
-                Node() {
-                    left = nullptr;
-                    right = nullptr;
-                    parent = nullptr;
-                }
-
-                Node(K _key, V _value) {
-                    left = nullptr;
-                    right = nullptr;
-                    parent = nullptr;
-                    key = _key;
-                    value = _value;
-                }
-        };
-
-        Node* root;
         Map() {
             root = nullptr;
             count = 0;
@@ -49,6 +125,10 @@ class Map {
 
         bool isEmpty() const {
             return root == nullptr;
+        }
+
+        MapIterator<K, V> iterator() {
+            return MapIterator<K, V>(*this);
         }
 
         void remove(K key) {
@@ -125,79 +205,30 @@ class Map {
             return count;
         }
         #pragma endregion
+};
 
-        void clear() {
-            cleanUp(root);
-        }
-        
-        void cleanUp(Node* &node) {
-            if(node == nullptr) 
-                return;
+template<typename TItem>
+struct Stack {
+    static const int DEFAULT_SIZE = 30;
 
-            cleanUp(node->left);
-            cleanUp(node->right);
-            delete node;
-            node = nullptr;
-        }
+    TItem data[DEFAULT_SIZE];
+    int head = -1;
 
-        Node* lookup(K key, Node* &node) {
-            if(node == nullptr)
-                return nullptr;
+    TItem back() {
+        return data[head];
+    }
 
-            if(key < node->key)
-                return lookup(key, node->left);
-            else if(key > node->key) 
-                return lookup(key, node->right);
+    bool empty() {
+        return head == -1;
+    }
 
-            return node;
-        }
+    void pop_back() {
+        head--;
+    }
 
-        void removeRoot() {
-            //  1. leaf
-            if(root->left == nullptr && root->right == nullptr) {
-                root = nullptr;
-            }
-
-            //  2. 2 children
-            else if(root->left != nullptr && root->right != nullptr) {
-                auto leftmost = root->right;
-                while(leftmost->left != nullptr)
-                    leftmost = leftmost->left;
-
-                remove(leftmost->key);
-
-                leftmost->left = root->left;
-                leftmost->right = root->right;
-
-                root = leftmost;
-            }
-
-            //  3. 1 child
-            else {
-                if(root->left != nullptr)
-                    root = root->left;
-                else
-                    root = root->right;
-            }
-        }
-
-        Node* insert(K &key, V &value, Node* &node) {
-            if(node == nullptr)
-                return new Node(key, value);
-
-            if(key < node->key) {
-                Node* left = insert(key, value, node->left);
-                node->left = left;
-                left->parent = node;
-            }
-            else if(key > node->key) {
-                Node* right = insert(key, value, node->right);
-                node->right = right;
-                right->parent = node;
-            }
-
-            return node;
-        }
+    void push_back(TItem value) {
+        data[++head] = value;
+    }
 };
 
 template <typename K, typename V>
@@ -209,7 +240,7 @@ class MapIterator {
 
     private:
         const Map<K, V>& map;
-        std::vector<Node*> stack;
+        Stack<Node*> stack;
         Node* current;
 
     public:
@@ -278,7 +309,6 @@ int main() {
     // 23  Factura pentru circ      120     ashduah
     // 23  Factura pentru circ      120     ashduah
     // 23  Factura pentru circ      120     ashduah
-
     Map<int, Invoice> map;
     for (size_t i = 0; i < 10; i++)
     {
@@ -287,14 +317,12 @@ int main() {
         invoice.name = "Factura " + std::to_string(invoice.id);
         invoice.cost = 20 + i;
         map.add(invoice.id, invoice);
-    }
-    
-    MapIterator<int, Invoice> iter = MapIterator<int, Invoice>(map);
+    }    
     
     std::string output;
     int maxLength = 0;
 
-    for (; iter.valid(); iter.next())
+    for (auto iter = map.iterator(); iter.valid(); iter.next())
     {
         auto p = iter.getCurrent();
         output += std::to_string(p.second.id);

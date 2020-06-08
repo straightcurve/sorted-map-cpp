@@ -1,7 +1,8 @@
 Features:
     ✔ Delete nodes @done(20-06-08 04:46)
     ☐ Update nodes (?)
-    ☐ Stack implementation (!!!)
+    ✔ Iterator @done(20-06-08 05:05)
+    ✔ Stack implementation (!!!) @done(20-06-08 05:26)
     ☐ Iterative clear
     ☐ Iterative insert
     ☐ Iterative lookup
