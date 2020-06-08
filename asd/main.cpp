@@ -197,8 +197,8 @@ public:
     }
 
     V search(K key) {
-        if (root == nullptr)
-            return nullptr;
+        // if (root == nullptr)
+        //     return nullptr;
 
         return lookup(key, root)->value;
     }
@@ -294,6 +294,21 @@ struct Invoice {
 
     std::string name;
     int cost = 0;
+
+    Invoice() {
+
+    }
+
+    Invoice(int _id, std::string _name, int _cost) {
+        id = _id;
+        name = _name;
+        cost = _cost;
+    }
+
+    // bool operator==(const Invoice other, const Invoice s2)
+    // {
+    //     return id == other.id && name == other.name && cost == other.cost;
+    // }
 };
 
 std::string getHeader(size_t suffix) {
@@ -306,6 +321,14 @@ std::string getHeader(size_t suffix) {
 
     return result;
 }
+
+void callTests();
+void testAdd();
+void testRemove();
+void testSearch();
+void testIsEmpty();
+void testSize();
+void testValid();
 
 int main() {
     // #    Name                    Cost    Other stuff..
@@ -344,4 +367,109 @@ int main() {
     std::cout << output << std::endl;
 
     return 0;
+}
+
+#include <assert.h>
+void callTests()
+{
+    testAdd();
+    testRemove();
+    testSearch();
+    testIsEmpty();
+    testSize();
+    testValid();
+}
+
+void testAdd()
+{
+    Map<int, Invoice> sm;
+    auto invoice1 = Invoice(1, "Factura1", 21);
+    auto invoice2 = Invoice(2, "Factura2", 22);
+    auto invoice3 = Invoice(3, "Factura3", 23);
+    auto iterator = sm.iterator();
+    sm.add(1, invoice1);
+    // assert(iterator.getCurrent() == std::make_pair(1, invoice1));
+
+    sm.add(2, invoice2);
+    iterator.next();
+    // assert(iterator.getCurrent() == std::make_pair(2, invoice2));
+    
+    sm.add(3, invoice3);
+    iterator.next();
+    // assert(iterator.getCurrent() == std::make_pair(3, invoice3));
+}
+
+void testRemove()
+{
+    Map<int, Invoice> sm;
+    auto invoice1 = Invoice(1, "Factura1", 21);
+    auto invoice2 = Invoice(2, "Factura2", 22);
+    auto invoice3 = Invoice(3, "Factura3", 23);
+    auto iterator = sm.iterator();
+    sm.add(1, invoice1);
+    sm.add(2, invoice2);
+
+    iterator.next();
+    // assert(iterator.getCurrent() == std::make_pair(2, invoice2));
+
+    sm.remove(2);
+    // assert(iterator.getCurrent() == std::make_pair(1, invoice1));
+}
+
+void testSearch()
+{
+    Map<int, Invoice> sm;
+    auto invoice1 = Invoice(1, "Factura1", 21);
+    auto invoice2 = Invoice(2, "Factura2", 22);
+    auto invoice3 = Invoice(3, "Factura3", 23);
+
+    sm.add(1, invoice1);
+    sm.add(2, invoice2);
+    // assert(sm.search(1) == invoice1);
+    // assert(sm.search(2) == invoice2);
+}
+
+void testIsEmpty()
+{
+    Map<int, Invoice> sm;
+    assert(sm.isEmpty());
+    auto invoice1 = Invoice(1, "Factura1", 21);
+    auto invoice2 = Invoice(2, "Factura2", 22);
+    assert(!sm.isEmpty());
+    sm.remove(1);
+    sm.remove(2);
+    assert(sm.isEmpty());
+}
+
+void testSize()
+{
+    Map<int, Invoice> sm;
+    auto invoice1 = Invoice(1, "Factura1", 21);
+    auto invoice2 = Invoice(2, "Factura2", 22);
+    auto invoice3 = Invoice(3, "Factura3", 23);
+    assert(sm.size() == 0);
+    sm.add(1, invoice1);
+    sm.add(2, invoice2);
+    assert(sm.size() == 2);
+    sm.remove(1);
+    sm.remove(2);
+    assert(sm.size() == 0);
+}
+
+void testValid()
+{
+    Map<int, Invoice> sm;
+    auto invoice1 = Invoice(1, "Factura1", 21);
+    auto invoice2 = Invoice(2, "Factura2", 22);
+    auto invoice3 = Invoice(3, "Factura3", 23);
+    auto iterator = sm.iterator();
+    assert(!iterator.valid());
+
+    // sm.add(1, invoice1);
+    // iterator = sm.iterator();
+    // assert(iterator.valid());
+
+    // sm.remove(1);
+    // iterator = sm.iterator();
+    // assert(iterator.valid());
 }
