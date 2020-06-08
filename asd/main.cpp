@@ -349,7 +349,9 @@ int main() {
             std::cout << "name=";  std::cin >> inv->name;
             std::cout << "cost="; std::cin >> inv->cost;
             map.add(inv->id, *inv);
-            break;
+            std::cout << "Successfully added the invoice." << std::endl;
+            std::cin >> op;
+            continue;
         }
         case 'd': {
             std::string output;
@@ -372,14 +374,15 @@ int main() {
             std::cout << getHeader(maxLength + 1) << std::endl;
             std::cout << output << std::endl;
             std::cin >> op;
-            break;
+            continue;
         }
         case 'r': {
             int k;
             std::cout << "key="; std::cin >> k;
             map.remove(k);
             std::cout << "Removed the specified key." << std::endl;
-            break;
+            std::cin >> op;
+            continue;
         }
         case 's': {
             int k;
