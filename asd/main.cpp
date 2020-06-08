@@ -1,5 +1,6 @@
 #include <string>
 #include <iostream>
+#include <assert.h>
 
 template <typename K, typename V>
 class MapIterator;
@@ -308,30 +309,23 @@ struct Invoice {
         cost = _cost;
     }
 
+    bool operator==(const Invoice& other) const
+    {
+        return (
+            id == other.id &&
+            name == other.name &&
+            cost == other.cost
+        );
+    }
+
     // bool operator==(const Invoice other, const Invoice s2)
     // {
     //     return id == other.id && name == other.name && cost == other.cost;
     // }
 };
 
-std::string getHeader(size_t suffix) {
-    std::string result = "#\tName";
-
-    for (size_t i = 0; i < suffix; i++)
-        result += " ";
-
-    result += "Cost";
-
-    return result;
-}
-
+std::string getHeader(size_t suffix);
 void callTests();
-void testAdd();
-void testRemove();
-void testSearch();
-void testIsEmpty();
-void testSize();
-void testValid();
 
 int main() {
     char op;
@@ -339,15 +333,23 @@ int main() {
     while (true)
     {
         system("@cls||clear");
-        std::cout << "Please select an option: " << '\n' << "a - Add an invoice" << '\n' << "r - Remove an invoice" << '\n' << "s - Seach for an invoice" << '\n' << "l - Load invoices" << '\n' << "d - Display all invoices" << '\n' <<  "e - Exit" << '\n';
-        std::cout << "op=";  std::cin >> op;
+        std::cout 
+            << "Please select an option: " << '\n' 
+            << "[A] - Add an invoice" << '\n' 
+            << "[R] - Remove an invoice" << '\n' 
+            << "[S] - Search for an invoice" << '\n' 
+            << "[L] - Load invoices" << '\n' 
+            << "[D] - Display all invoices" << '\n' 
+            << "[E] - Exit" << '\n'
+            << "Operation: ";
+        std::cin >> op;
         
         switch (op) {
         case 'a': {
             auto inv = new Invoice();
-            std::cout << "id=";  std::cin >> inv->id;
-            std::cout << "name=";  std::cin >> inv->name;
-            std::cout << "cost="; std::cin >> inv->cost;
+            std::cout << "ID: ";  std::cin >> inv->id;
+            std::cout << "Name: ";  std::cin >> inv->name;
+            std::cout << "Cost: "; std::cin >> inv->cost;
             map.add(inv->id, *inv);
             std::cout << "Successfully added the invoice." << std::endl;
             std::cin >> op;
@@ -378,21 +380,21 @@ int main() {
         }
         case 'r': {
             int k;
-            std::cout << "key="; std::cin >> k;
+            std::cout << "ID: "; std::cin >> k;
             map.remove(k);
-            std::cout << "Removed the specified key." << std::endl;
+            std::cout << "Removed the specified invoice." << std::endl;
             std::cin >> op;
             continue;
         }
         case 's': {
             int k;
-            std::cout << "key="; std::cin >> k;
+            std::cout << "ID: "; std::cin >> k;
             auto inv = map.search(k);
             if(inv.id == -1)
-                std::cout << "Couldn't find the specified key." << std::endl;
+                std::cout << "Couldn't find the specified invoice." << std::endl;
             else {
-                std::cout << "      " << "ID"   << "\t" << "Name"   << "\t\t" << "Cost"   << std::endl;
-                std::cout << "Found " << inv.id << "\t" << inv.name << "\t" << inv.cost << std::endl;
+                std::cout << getHeader(inv.name.length() + 1) << std::endl;
+                std::cout << inv.id << "\t" << inv.name << "\t" << inv.cost << std::endl;
             }
             std::cin >> op;
             continue;
@@ -411,7 +413,7 @@ int main() {
         case 'e':
             exit(0);
         default:
-            std::cout << "Unknown option" << '\n';
+            std::cout << "Unknown option." << '\n';
             break;
         }
 
@@ -421,7 +423,24 @@ int main() {
     return 0;
 }
 
-#include <assert.h>
+std::string getHeader(size_t suffix) {
+    std::string result = "#\tName";
+
+    for (size_t i = 0; i < suffix; i++)
+        result += " ";
+
+    result += "Cost";
+
+    return result;
+}
+
+void testAdd();
+void testRemove();
+void testSearch();
+void testIsEmpty();
+void testSize();
+void testValid();
+
 void callTests()
 {
     testAdd();
@@ -440,15 +459,15 @@ void testAdd()
     auto invoice3 = Invoice(3, "Factura3", 23);
     auto iterator = sm.iterator();
     sm.add(1, invoice1);
-    // assert(iterator.getCurrent() == std::make_pair(1, invoice1));
+    assert(iterator.getCurrent() == std::make_pair(1, invoice1));
 
     sm.add(2, invoice2);
     iterator.next();
-    // assert(iterator.getCurrent() == std::make_pair(2, invoice2));
+    assert(iterator.getCurrent() == std::make_pair(2, invoice2));
     
     sm.add(3, invoice3);
     iterator.next();
-    // assert(iterator.getCurrent() == std::make_pair(3, invoice3));
+    assert(iterator.getCurrent() == std::make_pair(3, invoice3));
 }
 
 void testRemove()
@@ -462,10 +481,10 @@ void testRemove()
     sm.add(2, invoice2);
 
     iterator.next();
-    // assert(iterator.getCurrent() == std::make_pair(2, invoice2));
+    assert(iterator.getCurrent() == std::make_pair(2, invoice2));
 
     sm.remove(2);
-    // assert(iterator.getCurrent() == std::make_pair(1, invoice1));
+    assert(iterator.getCurrent() == std::make_pair(1, invoice1));
 }
 
 void testSearch()
@@ -477,8 +496,8 @@ void testSearch()
 
     sm.add(1, invoice1);
     sm.add(2, invoice2);
-    // assert(sm.search(1) == invoice1);
-    // assert(sm.search(2) == invoice2);
+    assert(sm.search(1) == invoice1);
+    assert(sm.search(2) == invoice2);
 }
 
 void testIsEmpty()
