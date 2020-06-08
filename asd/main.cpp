@@ -199,8 +199,11 @@ public:
     V search(K key) {
         // if (root == nullptr)
         //     return nullptr;
+        auto found = lookup(key, root);
+        if(found == nullptr)
+            return V();
 
-        return lookup(key, root)->value;
+        return found->value;
     }
 
     int size() const {
@@ -290,7 +293,7 @@ public:
 };
 
 struct Invoice {
-    int id = 0;
+    int id = -1;
 
     std::string name;
     int cost = 0;
@@ -331,40 +334,86 @@ void testSize();
 void testValid();
 
 int main() {
-    // #    Name                    Cost    Other stuff..
-    // 23  Factura pentru circ      120     ashduah
-    // 23  Factura pentru circ      120     ashduah
-    // 23  Factura pentru circ      120     ashduah
-    // 23  Factura pentru circ      120     ashduah
+    char op;
     Map<int, Invoice> map;
-    for (size_t i = 0; i < 10; i++)
+    while (true)
     {
-        auto invoice = Invoice();
-        invoice.id = i + 100;
-        invoice.name = "Factura " + std::to_string(invoice.id);
-        invoice.cost = 20 + i;
-        map.add(invoice.id, invoice);
+        system("@cls||clear");
+        std::cout << "Please select an option: " << '\n' << "a - Add an invoice" << '\n' << "r - Remove an invoice" << '\n' << "s - Seach for an invoice" << '\n' << "l - Load invoices" << '\n' << "d - Display all invoices" << '\n' <<  "e - Exit" << '\n';
+        std::cout << "op=";  std::cin >> op;
+        
+        switch (op) {
+        case 'a': {
+            auto inv = new Invoice();
+            std::cout << "id=";  std::cin >> inv->id;
+            std::cout << "name=";  std::cin >> inv->name;
+            std::cout << "cost="; std::cin >> inv->cost;
+            map.add(inv->id, *inv);
+            break;
+        }
+        case 'd': {
+            std::string output;
+            size_t maxLength = 0;
+
+            for (auto iter = map.iterator(); iter.valid(); iter.next())
+            {
+                auto p = iter.getCurrent();
+                output += std::to_string(p.second.id);
+                output += "\t";
+                output += p.second.name;
+                output += "\t";
+                output += std::to_string(p.second.cost);
+                output += "\n";
+
+                if (p.second.name.length() > maxLength)
+                    maxLength = p.second.name.length();
+            }
+
+            std::cout << getHeader(maxLength + 1) << std::endl;
+            std::cout << output << std::endl;
+            std::cin >> op;
+            break;
+        }
+        case 'r': {
+            int k;
+            std::cout << "key="; std::cin >> k;
+            map.remove(k);
+            std::cout << "Removed the specified key." << std::endl;
+            break;
+        }
+        case 's': {
+            int k;
+            std::cout << "key="; std::cin >> k;
+            auto inv = map.search(k);
+            if(inv.id == -1)
+                std::cout << "Couldn't find the specified key." << std::endl;
+            else {
+                std::cout << "      " << "ID"   << "\t" << "Name"   << "\t\t" << "Cost"   << std::endl;
+                std::cout << "Found " << inv.id << "\t" << inv.name << "\t" << inv.cost << std::endl;
+            }
+            std::cin >> op;
+            continue;
+        }
+        case 'l': {
+            for (size_t i = 0; i < 5; i++)
+            {
+                auto invoice = Invoice();
+                invoice.id = i + 100;
+                invoice.name = "Factura " + std::to_string(invoice.id);
+                invoice.cost = 20 + i;
+                map.add(invoice.id, invoice);
+            }
+            break;
+        }
+        case 'e':
+            exit(0);
+        default:
+            std::cout << "Unknown option" << '\n';
+            break;
+        }
+
+        continue;
     }
-
-    std::string output;
-    size_t maxLength = 0;
-
-    for (auto iter = map.iterator(); iter.valid(); iter.next())
-    {
-        auto p = iter.getCurrent();
-        output += std::to_string(p.second.id);
-        output += "\t";
-        output += p.second.name;
-        output += "\t";
-        output += std::to_string(p.second.cost);
-        output += "\n";
-
-        if (p.second.name.length() > maxLength)
-            maxLength = p.second.name.length();
-    }
-
-    std::cout << getHeader(maxLength + 1) << std::endl;
-    std::cout << output << std::endl;
 
     return 0;
 }
