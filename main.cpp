@@ -1,6 +1,7 @@
 #include <string>
 #include <iostream>
 #include <iterator>
+#include <vector>
 
 template <typename K, typename V>
 class Map {
@@ -40,6 +41,91 @@ class Map {
             clear();
         }
 
+        #pragma region Public methods
+        void add(K key, V value) {
+            root = insert(key, value, root);
+            count++;
+        }
+
+        bool isEmpty() const {
+            return root == nullptr;
+        }
+
+        void remove(K key) {
+            Node* node = root;
+            Node* parent = nullptr;
+            bool isLeftNode = false;
+
+            if(node->key == key)
+                return removeRoot();
+
+            while(node->key != key) {
+                if(key < node->key) {
+                    parent = node;
+                    node = node->left;
+                    isLeftNode = true;
+                } else {
+                    parent = node;
+                    node = node->right;
+                    isLeftNode = false;
+                }
+            }
+            
+            //  1. leaf
+            if(node->left == nullptr && node->right == nullptr) {
+                if(isLeftNode)
+                    parent->left = nullptr;
+                else
+                    parent->right = nullptr;
+            }
+
+            //  2. 2 children
+            else if(node->left != nullptr && node->right != nullptr) {
+                auto leftmost = node->right;
+                while(leftmost->left != nullptr)
+                    leftmost = leftmost->left;
+
+                remove(leftmost->key);
+
+                leftmost->left = node->left;
+                leftmost->right = node->right;
+
+                if(isLeftNode)
+                    parent->left = leftmost;
+                else
+                    parent->right = leftmost;
+            }
+
+            //  3. 1 child
+            else {
+                if(node->left != nullptr) {
+                    if(isLeftNode)
+                        parent->left = node->left;
+                    else
+                        parent->right = node->left;
+                } else {
+                    if(isLeftNode)
+                        parent->left = node->right;
+                    else
+                        parent->right = node->right;
+                }
+            }
+
+            count--;
+        }
+
+        V search(K key) {
+            if(root == nullptr)
+                return nullptr;
+
+            return lookup(key, root)->value;
+        }
+
+        int size() const {
+            return count;
+        }
+        #pragma endregion
+
         void clear() {
             cleanUp(root);
         }
@@ -54,20 +140,45 @@ class Map {
             node = nullptr;
         }
 
-        void deleteNode(K key, Node* &node) {
-
-        }
-
-        void erase(K key) {
-            root = deleteNode(key, root);
-            count--;
-        }
-
-        V get(K key) {
-            if(root == nullptr)
+        Node* lookup(K key, Node* &node) {
+            if(node == nullptr)
                 return nullptr;
 
-            return search(key, root);
+            if(key < node->key)
+                return lookup(key, node->left);
+            else if(key > node->key) 
+                return lookup(key, node->right);
+
+            return node;
+        }
+
+        void removeRoot() {
+            //  1. leaf
+            if(root->left == nullptr && root->right == nullptr) {
+                root = nullptr;
+            }
+
+            //  2. 2 children
+            else if(root->left != nullptr && root->right != nullptr) {
+                auto leftmost = root->right;
+                while(leftmost->left != nullptr)
+                    leftmost = leftmost->left;
+
+                remove(leftmost->key);
+
+                leftmost->left = root->left;
+                leftmost->right = root->right;
+
+                root = leftmost;
+            }
+
+            //  3. 1 child
+            else {
+                if(root->left != nullptr)
+                    root = root->left;
+                else
+                    root = root->right;
+            }
         }
 
         Node* insert(K &key, V &value, Node* &node) {
@@ -87,34 +198,7 @@ class Map {
 
             return node;
         }
-        
-        bool isEmpty() const {
-            return root == nullptr;
-        }
-        
-        V search(K key, Node* &node) {
-            if(node == nullptr)
-                return nullptr;
-
-            if(key < node->key)
-                return search(key, node->left);
-            else if(key > node->key) 
-                return search(key, node->right);
-
-            return node->value;
-        }
-
-        void set(K key, V value) {
-            root = insert(key, value, root);
-            count++;
-        }
-
-        int size() const {
-            return count;
-        }
 };
-
-#include <queue>
 
 template <typename K, typename V>
 class MapIterator {
@@ -125,82 +209,107 @@ class MapIterator {
 
     private:
         const Map<K, V>& map;
-        std::queue<Node*> stack;
+        std::vector<Node*> stack;
         Node* current;
 
     public:
         MapIterator(const Map<K, V>& m): map(m)
         {
-            // map = m;
-            this->current = map.root;
-
-            while(this->current != nullptr) {
-                stack.push(this->current);
-                this->current = this->current->left;
+            current = map.root;
+            while(current != nullptr) {
+                stack.push_back(current);
+                current = current->left;
             }
 
             if(!stack.empty()) {
-                this->current = stack.front();
-                stack.pop();
-            }
-            else
-                this->current = nullptr;
+                current = stack.back();
+                stack.pop_back();
+            } else
+                current = nullptr;
         }
 
         bool valid() const {
-            return this->current != nullptr;
+            return current != nullptr;
         }
 
         KeyValuePair getCurrent() const {
-            return KeyValuePair(this->current->key, this->current->value);
+            return KeyValuePair(current->key, current->value);
         }
 
         void next() {
-            this->current = stack.front();
-            stack.pop();
+            if(current->right != nullptr) {
+                current = current->right;
 
-            if(this->current->right != nullptr) {
-                this->current = this->current->right;
-                while(this->current != nullptr) {
-                    this->stack.push(this->current);
-                    this->current = this->current->left;
+                while(current != nullptr) {
+                    stack.push_back(current);
+                    current = current->left;
                 }
             }
-            
-            if(stack.size()){
-                this->current = stack.front();
-                stack.pop();
-            }
-            else
-                this->current = nullptr;
+
+            if(!stack.empty()) {
+                current = stack.back();
+                stack.pop_back();
+            } else
+                current = nullptr;
         }
 };
 
-#include <map>
+struct Invoice {
+    int id;
+
+    std::string name;
+    int cost;
+};
+
+std::string getHeader(int suffix) {
+    std::string result = "#\tName";
+
+    for (size_t i = 0; i < suffix; i++)
+        result += " ";
+
+    result += "Cost";
+
+    return result;
+}
 
 int main() {
+    // #    Name                    Cost    Other stuff..
+    // 23  Factura pentru circ      120     ashduah
+    // 23  Factura pentru circ      120     ashduah
+    // 23  Factura pentru circ      120     ashduah
+    // 23  Factura pentru circ      120     ashduah
 
-    Map<int, std::string> maplol;
-
-    maplol.set(3, "Hello");
-    maplol.set(15, "?");
-    maplol.set(5, "World");
-    maplol.set(8, "!");
-
-    // map.delete(15);
-
-    auto x = maplol.get(15);
-
-    std::cout << x << std::endl;
-
-    MapIterator<int, std::string> iter = MapIterator<int, std::string>(maplol);
+    Map<int, Invoice> map;
+    for (size_t i = 0; i < 10; i++)
+    {
+        auto invoice = Invoice();
+        invoice.id = i + 100;
+        invoice.name = "Factura " + std::to_string(invoice.id);
+        invoice.cost = 20 + i;
+        map.add(invoice.id, invoice);
+    }
     
+    MapIterator<int, Invoice> iter = MapIterator<int, Invoice>(map);
+    
+    std::string output;
+    int maxLength = 0;
 
     for (; iter.valid(); iter.next())
     {
-        std::cout << iter.getCurrent().second << std::endl;
+        auto p = iter.getCurrent();
+        output += std::to_string(p.second.id);
+        output += "\t";
+        output += p.second.name;
+        output += "\t";
+        output += std::to_string(p.second.cost);
+        output += "\n";
+
+        if(p.second.name.length() > maxLength)
+            maxLength = p.second.name.length();
     }
-    
+
+    std::cout << getHeader(maxLength + 1) << std::endl;
+    std::cout << output << std::endl;
 
     return 0;
 }

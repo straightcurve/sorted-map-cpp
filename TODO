@@ -1,10 +1,14 @@
 Features:
-    ☐ Delete nodes
+    ✔ Delete nodes @done(20-06-08 04:46)
     ☐ Update nodes (?)
+    ☐ Stack implementation (!!!)
+    ☐ Iterative clear
+    ☐ Iterative insert
+    ☐ Iterative lookup
     ☐ Tests
 
 Bugfixes:
-    ☐ Segfault on MapIterator
+    ✔ Segfault on MapIterator @done(20-06-08 02:48)
 
 Extra:
     ☐ Cleaner project structure
