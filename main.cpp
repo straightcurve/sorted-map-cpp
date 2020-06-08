@@ -286,13 +286,12 @@ class MapIterator {
 };
 
 struct Invoice {
-    int id;
-
+    int id = 0;
     std::string name;
-    int cost;
+    int cost = 0;
 };
 
-std::string getHeader(int suffix) {
+std::string getHeader(size_t suffix) {
     std::string result = "#\tName";
 
     for (size_t i = 0; i < suffix; i++)
@@ -309,6 +308,10 @@ int main() {
     // 23  Factura pentru circ      120     ashduah
     // 23  Factura pentru circ      120     ashduah
     // 23  Factura pentru circ      120     ashduah
+
+    //test
+    callTests();
+
     Map<int, Invoice> map;
     for (size_t i = 0; i < 10; i++)
     {
@@ -320,7 +323,7 @@ int main() {
     }    
     
     std::string output;
-    int maxLength = 0;
+    size_t maxLength = 0;
 
     for (auto iter = map.iterator(); iter.valid(); iter.next())
     {
@@ -340,4 +343,108 @@ int main() {
     std::cout << output << std::endl;
 
     return 0;
+}
+
+
+#include <assert.h>
+void callTests()
+{
+    testAdd();
+    testRemove();
+    testSearch();
+    testIsEmpty();
+    testSize();
+    testValid()
+    //getCurrent, next basically tested in the other tests
+    testIterator();
+}
+
+void testAdd()
+{
+    Map<int, Invoice> sm;
+    auto invoice1 = Invoice(1, "Factura1", 21);
+    auto invoice2 = Invoice(2, "Factura2", 22);
+    auto invoice3 = Invoice(3, "Factura3", 23);
+    sm.add(1, invoice1);
+    assert(sm.iterator.getCurrent() == (1, invoice1));
+    sm.add(2, invoice2);
+    sm.iterator.next();
+    assert(sm.iterator.getCurrent() == (2, invoice2));
+    map.add(3, invoice3);
+    assert(sm.iterator.getCurrent() == (2, invoice2));
+}
+
+void testRemove()
+{
+    Map<int, Invoice> sm;
+    auto invoice1 = Invoice(1, "Factura1", 21);
+    auto invoice2 = Invoice(2, "Factura2", 22);
+    auto invoice3 = Invoice(3, "Factura3", 23);
+    sm.add(1, invoice1);
+    sm.add(2, invoice2);
+    sm.iterator.next();
+    assert(sm.iterator.getCurrent() == (2, invoice2));
+    sm.remove(2);
+    assert(sm.iterator.getCurrent() == (1, invoice1));
+}
+
+void testSearch()
+{
+    Map<int, Invoice> sm;
+    auto invoice1 = Invoice(1, "Factura1", 21);
+    auto invoice2 = Invoice(2, "Factura2", 22);
+    auto invoice3 = Invoice(3, "Factura3", 23);
+    assert(sm.search(2) == nullptr);
+    sm.add(1, invoice1);
+    sm.add(2, invoice2);
+    assert(sm.search(1) == (1, invoice1));
+    assert(sm.search(2) == (2, invoice2));
+}
+
+void testIsEmpty()
+{
+    Map<int, Invoice> sm;
+    assert(sm.isEmpty() == 1);
+    auto invoice1 = Invoice(1, "Factura1", 21);
+    auto invoice2 = Invoice(2, "Factura2", 22);
+    assert(sm.isEmpty() == 0);
+    sm.remove(1);
+    sm.remove(2);
+    assert(sm.isEmpty() == 1);
+}
+
+void testSize()
+{
+    Map<int, Invoice> sm;
+    auto invoice1 = Invoice(1, "Factura1", 21);
+    auto invoice2 = Invoice(2, "Factura2", 22);
+    auto invoice3 = Invoice(3, "Factura3", 23);
+    assert(sm.size() == 0);
+    sm.add(1, invoice1);
+    sm.add(2, invoice2);
+    assert(sm.size() == 2);
+    sm.remove(1);
+    sm.remove(2);
+    assert(sm.size() == 0);
+}
+
+testValid()
+{
+    Map<int, Invoice> sm;
+    auto invoice1 = Invoice(1, "Factura1", 21);
+    auto invoice2 = Invoice(2, "Factura2", 22);
+    auto invoice3 = Invoice(3, "Factura3", 23);
+    assert(sm.iterator.valid() == 0);
+    sm.add(1, invoice1);
+    assert(sm.iterator.valid() == 1);
+    sm.remove(1);
+    assert(sm.iterator.valid() == 0);
+}
+
+testIterator()
+{
+    //TODO
+    assert();
+    assert();
+    assert();
 }
