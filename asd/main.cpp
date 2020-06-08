@@ -198,8 +198,6 @@ public:
     }
 
     V search(K key) {
-        // if (root == nullptr)
-        //     return nullptr;
         auto found = lookup(key, root);
         if(found == nullptr)
             return V();
